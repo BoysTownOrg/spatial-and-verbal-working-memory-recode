@@ -7,8 +7,8 @@ encodingOnsetIndices = find(encodingOnsetLogicalIndices);
 retrievalOnsetIndices = find(retrievalOnsetLogicalIndices);
 for retrievalIndex = find(retrievalOnsetLogicalIndices).'
     responseIndex = retrievalIndex + 2;
-    if bitget(events(responseIndex, end), 8+1) && ismember(events(retrievalIndex, end), [33, 4129]) ...
-            || bitget(events(responseIndex, end), 9+1) && ismember(events(retrievalIndex, end), [34, 4130])
+    if responseIndex <= size(events, 1) && bitget(events(responseIndex, end), 8+1) && ismember(events(retrievalIndex, end), [33, 4129]) ...
+            || responseIndex <= size(events, 1) && bitget(events(responseIndex, end), 9+1) && ismember(events(retrievalIndex, end), [34, 4130])
         events(encodingOnsetIndices + 1, end) = bitset(events(encodingOnsetLogicalIndices, end), 12 + 1);
         events(retrievalOnsetIndices + 1, end) = bitset(events(retrievalOnsetLogicalIndices, end), 12 + 1);
     else
