@@ -1,7 +1,6 @@
 function events = recode(events)
 fixationLogicalIndices = diff([0; ismember(events(:, end), [20, 4116])]) == 1;
 encodingOnsetLogicalIndices = diff([0; ismember(events(:, end), [23, 24, 4119, 4120])]) == 1;
-maintenanceLogicalIndices = diff([0; ismember(events(:, end), [25, 4121])]) == 1;
 retrievalOnsetLogicalIndices = diff([0; ismember(events(:, end), [33, 34, 4129, 4130])]) == 1;
 encodingOnsetIndices = find(encodingOnsetLogicalIndices);
 retrievalOnsetIndices = find(retrievalOnsetLogicalIndices);
