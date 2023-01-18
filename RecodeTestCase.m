@@ -101,5 +101,22 @@ classdef RecodeTestCase < matlab.unittest.TestCase
                 50208000       	1	4129
                 50693000       	1	256]);
         end
+
+        function tbd7(self)
+            events = [
+                51498000       	1	4116
+                53350000       	1	24
+                53359000       	1	4120
+                54852000       	1	4121
+                57354000       	1	34
+                57361000       	1	4130
+                58159000       	1	256
+                ];
+            self.assertEqual(recode(events), [
+                53359000       	1	8120
+                54852000       	1	4121
+                57361000       	1	8130
+                58159000       	1	256]);
+        end
     end
 end
