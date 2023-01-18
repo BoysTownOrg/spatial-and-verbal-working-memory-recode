@@ -4,8 +4,17 @@ encodingOnsetLogicalIndices = diff([0; ismember(events(:, end), [23, 24, 4119, 4
 maintenanceLogicalIndices = diff([0; ismember(events(:, end), [25, 4121])]) == 1;
 retrievalOnsetLogicalIndices = diff([0; ismember(events(:, end), [33, 34, 4129, 4130])]) == 1;
 encodingOnsetIndices = find(encodingOnsetLogicalIndices);
-events(encodingOnsetIndices + 1, end) = bitset(events(encodingOnsetLogicalIndices, end), 12 + 1);
 retrievalOnsetIndices = find(retrievalOnsetLogicalIndices);
-events(retrievalOnsetIndices + 1, end) = bitset(events(retrievalOnsetLogicalIndices, end), 12 + 1);
+for retrievalIndex = find(retrievalOnsetLogicalIndices).'
+    responseIndex = retrievalIndex + 2;
+    if bitget(events(responseIndex, end), 8+1) && ismember(events(retrievalIndex, end), [33, 4129]) ...
+            || bitget(events(responseIndex, end), 9+1) && ismember(events(retrievalIndex, end), [34, 4130])
+        events(encodingOnsetIndices + 1, end) = bitset(events(encodingOnsetLogicalIndices, end), 12 + 1);
+        events(retrievalOnsetIndices + 1, end) = bitset(events(retrievalOnsetLogicalIndices, end), 12 + 1);
+    else
+        events(encodingOnsetIndices + 1, end) = bitset(events(encodingOnsetLogicalIndices, end), 12 + 1) + 4000;
+        events(retrievalOnsetIndices + 1, end) = bitset(events(retrievalOnsetLogicalIndices, end), 12 + 1) + 4000;
+    end
+end
 events(encodingOnsetLogicalIndices | retrievalOnsetLogicalIndices | fixationLogicalIndices, :) = [];
 end
