@@ -1,5 +1,5 @@
 function events = recode(events)
-events([Inf; diff(events(:, 1))] <= 1024 & [1; diff(events(:, end))] == 0, :) = [];
+events([Inf; diff(events(:, 1))] <= 1024 & [1; diff(events(:, end))] == 0 & events(:, end) < 4096, :) = [];
 fixationLogicalIndices = diff([0; ismember(events(:, end), [20, 4116])]) == 1;
 encodingOnsetLogicalIndices = diff([0; ismember(events(:, end), [23, 24, 4119, 4120])]) == 1;
 retrievalOnsetLogicalIndices = diff([0; ismember(events(:, end), [33, 34, 4129, 4130])]) == 1;
