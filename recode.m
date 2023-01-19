@@ -17,19 +17,21 @@ for i = 1:numel(retrievalOnsetIndices)
     retrievalIndex = retrievalOnsetIndices(i);
     responseIndex = find(contributedByButton(retrievalIndex+1:lastCandidateResponseIndex), 1) + retrievalIndex;
     encodingOnsetTrigger = events(encodingOnsetIndices(i), end);
-    triggerFollowingEncodingOnset = events(encodingOnsetIndices(i) + 1, end);
+    encodingVisualTriggerIndex = find(~contributedByButton(encodingOnsetIndices(i)+1:end), 1) + encodingOnsetIndices(i);
+    triggerFollowingEncodingOnset = events(encodingVisualTriggerIndex, end);
     assert(ismember(triggerFollowingEncodingOnset, [bitset(encodingOnsetTrigger, 12 + 1), 4096]), "Unexpected trigger, %d, following encoding onset index %d.", triggerFollowingEncodingOnset, encodingOnsetIndices(i));
     retrievalOnsetTrigger = events(retrievalOnsetIndices(i), end);
-    triggerFollowingRetrievalOnset = events(retrievalOnsetIndices(i) + 1, end);
+    retrievalVisualTriggerIndex = find(~contributedByButton(retrievalOnsetIndices(i)+1:end), 1) + retrievalOnsetIndices(i);
+    triggerFollowingRetrievalOnset = events(retrievalVisualTriggerIndex, end);
     assert(ismember(triggerFollowingRetrievalOnset, [bitset(retrievalOnsetTrigger, 12 + 1), 4096]), "Unexpected trigger, %d, following retrieval onset index %d.", triggerFollowingRetrievalOnset, retrievalOnsetIndices(i));
     if ~isempty(responseIndex) ...
             && (bitget(events(responseIndex, end), 8+1) && ismember(events(retrievalIndex, end), [33, 4129]) ...
             || bitget(events(responseIndex, end), 9+1) && ismember(events(retrievalIndex, end), [34, 4130]))
-        events(encodingOnsetIndices(i) + 1, end) = bitset(encodingOnsetTrigger, 12 + 1);
-        events(retrievalOnsetIndices(i) + 1, end) = bitset(retrievalOnsetTrigger, 12 + 1);
+        events(encodingVisualTriggerIndex, end) = bitset(encodingOnsetTrigger, 12 + 1);
+        events(retrievalVisualTriggerIndex, end) = bitset(retrievalOnsetTrigger, 12 + 1);
     else
-        events(encodingOnsetIndices(i) + 1, end) = bitset(encodingOnsetTrigger, 12 + 1) + 4000;
-        events(retrievalOnsetIndices(i) + 1, end) = bitset(retrievalOnsetTrigger, 12 + 1) + 4000;
+        events(encodingVisualTriggerIndex, end) = bitset(encodingOnsetTrigger, 12 + 1) + 4000;
+        events(retrievalVisualTriggerIndex, end) = bitset(retrievalOnsetTrigger, 12 + 1) + 4000;
     end
 end
 events(encodingOnsetLogicalIndices | retrievalOnsetLogicalIndices | fixationLogicalIndices, :) = [];
