@@ -39,5 +39,22 @@ classdef TrialMetricsTestCase < matlab.unittest.TestCase
             self.verifyEqual(metrics(1).reactionTimeMilliseconds, 22865 - 22310);
             self.verifyEqual(metrics(1).condition, Condition.InSet);
         end
+
+        function tbd3(self)
+            events = [
+                30718000       	1	4116
+                32221000       	1	23
+                32232000       	1	4119
+                33723000       	1	4121
+                36225000       	1	33
+                36234000       	1	4129
+                37095000       	1	512
+                ];
+            metrics = trialMetrics(recode(events));
+            self.verifyTrialCount(metrics, 1);
+            self.verifyFalse(metrics(1).correct);
+            self.verifyEqual(metrics(1).reactionTimeMilliseconds, nan);
+            self.verifyEqual(metrics(1).condition, Condition.InSet);
+        end
     end
 end
