@@ -1,7 +1,7 @@
 function events = recode(events)
 events([Inf; diff(events(:, 1))] <= 1024 & [1; diff(events(:, end))] == 0 & events(:, end) < 4096, :) = [];
 fixationLogicalIndices = diff([0; ismember(events(:, end), [20, 4116])]) == 1;
-encodingOnsetLogicalIndices = diff([0; ismember(events(:, end), [23, 24, 4119, 4120])]) == 1;
+encodingOnsetLogicalIndices = findEncodingOnsetLogicalIndices(events);
 maintenanceLogicalIndices = diff([0; ismember(events(:, end), 4121)]) == 1;
 retrievalOnsetLogicalIndices = diff([0; ismember(events(:, end), [33, 34, 4129, 4130])]) == 1;
 encodingOnsetIndices = find(encodingOnsetLogicalIndices);
@@ -41,4 +41,21 @@ for i = 1:numel(retrievalOnsetIndices)
     end
 end
 events((encodingOnsetLogicalIndices | retrievalOnsetLogicalIndices | fixationLogicalIndices) & ~encodingVisualLogicalIndices, :) = [];
+end
+
+function indices = findEncodingOnsetLogicalIndices(events)
+indices = false([size(events, 1), 1]);
+offset = 1;
+candidates = ismember(events(:, end), [23, 24, 4119, 4120]);
+while offset <= size(events, 1)
+    nextIndex = find(candidates(offset:end), 1) + offset - 1;
+    if isempty(nextIndex)
+        break
+    end
+    indices(nextIndex) = true;
+    offset = nextIndex + 1;
+    while offset <= size(events, 1) && candidates(offset) || bitget(events(offset, end), 8 + 1) || bitget(events(offset, end), 9 + 1)
+        offset = offset + 1;
+    end
+end
 end
