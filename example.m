@@ -11,8 +11,8 @@ groupStream.write(sprintf( ...
     'In-set RT (ms)', ...
     'Out-of-set RT (ms)'));
 for i = 1:numel(files)
+    filepath = [files(i).folder, filesep, files(i).name];
     try
-        filepath = [files(i).folder, filesep, files(i).name]
         events = readBESAevt(filepath);
         recoded = recode(events);
         metrics = trialMetrics(recoded);
@@ -48,6 +48,7 @@ for i = 1:numel(files)
                 round(metrics(j).reactionTimeMilliseconds)));
         end
     catch ME
+        fprintf("Failed to process %s\n", filepath)
         disp(ME)
     end
 end

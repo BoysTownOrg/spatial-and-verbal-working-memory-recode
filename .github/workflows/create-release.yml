@@ -1,0 +1,22 @@
+on:
+  push:
+    tags:
+      - v[0-9]+.[0-9]+.[0-9]+
+
+jobs:
+  release:
+    name: create release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Get the version
+        id: get_version
+        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\/v/}
+      - name: Create version function
+        run: echo "function v = version, v = '${{ steps.get_version.outputs.VERSION }}'; end" >version.m
+      - name: create GitHub release
+        run: |
+          zip spatial-and-verbal-working-memory-recode-v${{ steps.get_version.outputs.VERSION }}.zip *.m
+          gh release create v${{ steps.get_version.outputs.VERSION }} spatial-and-verbal-working-memory-recode-v${{ steps.get_version.outputs.VERSION }}.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
