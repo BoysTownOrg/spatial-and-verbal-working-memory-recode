@@ -1,9 +1,9 @@
 function events = recode(events)
 events([Inf; diff(events(:, 1))] <= 1024 & [1; diff(events(:, end))] == 0 & events(:, end) < 4096, :) = [];
 fixationLogicalIndices = diff([0; ismember(events(:, end), [20, 4116])]) == 1;
-encodingOnsetLogicalIndices = findEncodingOnsetLogicalIndices(events);
+encodingOnsetLogicalIndices = findOnsetLogicalIndices(events, [23, 24, 4119, 4120]);
 maintenanceLogicalIndices = diff([0; ismember(events(:, end), 4121)]) == 1;
-retrievalOnsetLogicalIndices = diff([0; ismember(events(:, end), [33, 34, 4129, 4130])]) == 1;
+retrievalOnsetLogicalIndices = findOnsetLogicalIndices(events, [33, 34, 4129, 4130]);
 encodingOnsetIndices = find(encodingOnsetLogicalIndices);
 retrievalOnsetIndices = find(retrievalOnsetLogicalIndices);
 assert(numel(encodingOnsetIndices) == numel(retrievalOnsetIndices), ...
@@ -43,10 +43,10 @@ end
 events((encodingOnsetLogicalIndices | retrievalOnsetLogicalIndices | fixationLogicalIndices) & ~encodingVisualLogicalIndices, :) = [];
 end
 
-function indices = findEncodingOnsetLogicalIndices(events)
+function indices = findOnsetLogicalIndices(events, candidateTriggers)
 indices = false([size(events, 1), 1]);
 offset = 1;
-candidates = ismember(events(:, end), [23, 24, 4119, 4120]);
+candidates = ismember(events(:, end), candidateTriggers);
 while offset <= size(events, 1)
     nextIndex = find(candidates(offset:end), 1) + offset - 1;
     if isempty(nextIndex)
