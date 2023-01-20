@@ -1,6 +1,6 @@
-function example
-files = dir(['reference', filesep, 'evts', filesep, '*.evt']);
-groupStream = FileStream('group_behavior.txt');
+function runAnalysis(inputDirectory, outputDirectory)
+files = dir([inputDirectory, filesep, '*.evt']);
+groupStream = FileStream([outputDirectory, filesep, 'group_behavior.txt']);
 groupStream.write(sprintf( ...
     '%s\t%s\t%s\t%s\t%s\t%s\t%s\n', ...
     'Filename', ...
@@ -26,13 +26,13 @@ for i = 1:numel(files)
             reactionTimeMilliseconds(metrics([metrics.condition] == Condition.InSet)), ...
             reactionTimeMilliseconds(metrics([metrics.condition] == Condition.OutOfSet))));
 
-        recodedFilename = ['recoded', filesep, files(i).name(1:end-4), '_recoded.evt'];
+        recodedFilename = [outputDirectory, filesep, files(i).name(1:end-4), '_recoded.evt'];
         fid = fopen(recodedFilename, 'wt');
         fprintf(fid, 'Tmu         	Code	TriNo\n');
         fclose(fid);
         dlmwrite(recodedFilename, recoded, 'delimiter', '\t', '-append', 'precision', '%.0f');
 
-        individualStream = FileStream(['recoded', filesep, files(i).name(1:end-4), '.txt']);
+        individualStream = FileStream([outputDirectory, filesep, files(i).name(1:end-4), '.txt']);
         individualStream.write(sprintf( ...
             '%s\t%s\t%s\t%s\n', ...
             'Trial', ...
@@ -48,7 +48,7 @@ for i = 1:numel(files)
                 round(metrics(j).reactionTimeMilliseconds)));
         end
     catch ME
-        fprintf("Failed to process %s\n", filepath)
+        warning("Failed to process %s\n", filepath)
         disp(ME)
     end
 end
