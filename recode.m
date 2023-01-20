@@ -1,9 +1,11 @@
 function events = recode(events)
-events([Inf; diff(events(:, 1))] <= 1024 & [1; diff(events(:, end))] == 0 & events(:, end) < 4096, :) = [];
-fixationLogicalIndices = diff([0; ismember(events(:, end), [20, 4116])]) == 1;
-encodingOnsetLogicalIndices = findOnsetLogicalIndices(events, [23, 24, 4119, 4120]);
-maintenanceLogicalIndices = diff([0; ismember(events(:, end), 4121)]) == 1;
-retrievalOnsetLogicalIndices = findOnsetLogicalIndices(events, [33, 34, 4129, 4130]);
+events([Inf; diff(events(:, 1))] <= 1024 ...
+    & [1; diff(events(:, end))] == 0 ...
+    & events(:, end) < bitset(0, BitTrigger.visual), :) = [];
+fixationLogicalIndices = firstOfGroupLogicalIndices(events, [20, bitset(20, BitTrigger.visual)]);
+encodingOnsetLogicalIndices = findOnsetLogicalIndices(events, [23, 24, bitset(24, BitTrigger.visual), bitset(23, BitTrigger.visual)]);
+maintenanceLogicalIndices = firstOfGroupLogicalIndices(events, bitset(25, BitTrigger.visual));
+retrievalOnsetLogicalIndices = findOnsetLogicalIndices(events, [33, 34, bitset(33, BitTrigger.visual), bitset(34, BitTrigger.visual)]);
 encodingOnsetIndices = find(encodingOnsetLogicalIndices);
 retrievalOnsetIndices = find(retrievalOnsetLogicalIndices);
 assert(numel(encodingOnsetIndices) == numel(retrievalOnsetIndices), ...
@@ -25,19 +27,19 @@ for i = 1:numel(retrievalOnsetIndices)
     end
     encodingVisualLogicalIndices(encodingVisualTriggerIndex) = true;
     triggerFollowingEncodingOnset = events(encodingVisualTriggerIndex, end);
-    assert(ismember(triggerFollowingEncodingOnset, [bitset(encodingOnsetTrigger, 12 + 1), 4096]), "Unexpected trigger, %d, following encoding onset index %d.", triggerFollowingEncodingOnset, encodingOnsetIndices(i));
+    assert(ismember(triggerFollowingEncodingOnset, [bitset(encodingOnsetTrigger, BitTrigger.visual), bitset(0, BitTrigger.visual)]), "Unexpected trigger, %d, following encoding onset index %d.", triggerFollowingEncodingOnset, encodingOnsetIndices(i));
     retrievalOnsetTrigger = events(retrievalOnsetIndices(i), end);
     retrievalVisualTriggerIndex = find(~contributedByButton(retrievalOnsetIndices(i)+1:end), 1) + retrievalOnsetIndices(i);
     triggerFollowingRetrievalOnset = events(retrievalVisualTriggerIndex, end);
-    assert(ismember(triggerFollowingRetrievalOnset, [bitset(retrievalOnsetTrigger, 12 + 1), 4096, 4097, 4098]), "Unexpected trigger, %d, following retrieval onset index %d.", triggerFollowingRetrievalOnset, retrievalOnsetIndices(i));
+    assert(ismember(triggerFollowingRetrievalOnset, [bitset(retrievalOnsetTrigger, BitTrigger.visual), bitset(0, BitTrigger.visual), 4097, 4098]), "Unexpected trigger, %d, following retrieval onset index %d.", triggerFollowingRetrievalOnset, retrievalOnsetIndices(i));
     if ~isempty(responseIndex) ...
-            && (bitget(events(responseIndex, end), 8+1) && ismember(events(retrievalIndex, end), [33, 4129]) ...
-            || bitget(events(responseIndex, end), 9+1) && ismember(events(retrievalIndex, end), [34, 4130]))
-        events(encodingVisualTriggerIndex, end) = bitset(encodingOnsetTrigger, 12 + 1);
-        events(retrievalVisualTriggerIndex, end) = bitset(retrievalOnsetTrigger, 12 + 1);
+            && (bitget(events(responseIndex, end), BitTrigger.buttonOne) && ismember(events(retrievalIndex, end), [33, 4129]) ...
+            || bitget(events(responseIndex, end), BitTrigger.buttonTwo) && ismember(events(retrievalIndex, end), [34, 4130]))
+        events(encodingVisualTriggerIndex, end) = bitset(encodingOnsetTrigger, BitTrigger.visual);
+        events(retrievalVisualTriggerIndex, end) = bitset(retrievalOnsetTrigger, BitTrigger.visual);
     else
-        events(encodingVisualTriggerIndex, end) = bitset(encodingOnsetTrigger, 12 + 1) + 4000;
-        events(retrievalVisualTriggerIndex, end) = bitset(retrievalOnsetTrigger, 12 + 1) + 4000;
+        events(encodingVisualTriggerIndex, end) = bitset(encodingOnsetTrigger, BitTrigger.visual) + 4000;
+        events(retrievalVisualTriggerIndex, end) = bitset(retrievalOnsetTrigger, BitTrigger.visual) + 4000;
     end
 end
 events((encodingOnsetLogicalIndices | retrievalOnsetLogicalIndices | fixationLogicalIndices) & ~encodingVisualLogicalIndices, :) = [];
@@ -54,8 +56,12 @@ while offset <= size(events, 1)
     end
     indices(nextIndex) = true;
     offset = nextIndex + 1;
-    while offset <= size(events, 1) && (candidates(offset) || bitget(events(offset, end), 8 + 1) || bitget(events(offset, end), 9 + 1))
+    while offset <= size(events, 1) && (candidates(offset) || bitget(events(offset, end), BitTrigger.buttonOne) || bitget(events(offset, end), BitTrigger.buttonTwo))
         offset = offset + 1;
     end
 end
+end
+
+function indices = firstOfGroupLogicalIndices(events, candidateTriggers)
+indices = diff([0; ismember(events(:, end), candidateTriggers)]) == 1;
 end
