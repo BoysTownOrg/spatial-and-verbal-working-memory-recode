@@ -29,7 +29,7 @@ for i = 1:numel(retrievalOnsetIndices)
     retrievalOnsetTrigger = events(retrievalOnsetIndices(i), end);
     retrievalVisualTriggerIndex = find(~contributedByButton(retrievalOnsetIndices(i)+1:end), 1) + retrievalOnsetIndices(i);
     triggerFollowingRetrievalOnset = events(retrievalVisualTriggerIndex, end);
-    assert(ismember(triggerFollowingRetrievalOnset, [bitset(retrievalOnsetTrigger, 12 + 1), 4096, 4097]), "Unexpected trigger, %d, following retrieval onset index %d.", triggerFollowingRetrievalOnset, retrievalOnsetIndices(i));
+    assert(ismember(triggerFollowingRetrievalOnset, [bitset(retrievalOnsetTrigger, 12 + 1), 4096, 4097, 4098]), "Unexpected trigger, %d, following retrieval onset index %d.", triggerFollowingRetrievalOnset, retrievalOnsetIndices(i));
     if ~isempty(responseIndex) ...
             && (bitget(events(responseIndex, end), 8+1) && ismember(events(retrievalIndex, end), [33, 4129]) ...
             || bitget(events(responseIndex, end), 9+1) && ismember(events(retrievalIndex, end), [34, 4130]))
@@ -54,7 +54,7 @@ while offset <= size(events, 1)
     end
     indices(nextIndex) = true;
     offset = nextIndex + 1;
-    while offset <= size(events, 1) && candidates(offset) || bitget(events(offset, end), 8 + 1) || bitget(events(offset, end), 9 + 1)
+    while offset <= size(events, 1) && (candidates(offset) || bitget(events(offset, end), 8 + 1) || bitget(events(offset, end), 9 + 1))
         offset = offset + 1;
     end
 end
